@@ -1,0 +1,108 @@
+<input id="r" type="range" min=0 max=255 />
+<input id="g" type="range" min=0 max=255 />
+<input id="b" type="range" min=0 max=255 />
+
+
+<div id="color" style="width: 100px;height: 100px;" />
+
+<script>
+  // 引用到属性的与其对应 callback
+  let callbacks = new Map();
+
+  // 缓存 reactive 返回的 proxy
+  let reactivties = new Map();
+
+  // 保存有使用到的属性，使用数组每次执行 get 都会触发 push，usedReactivties会无限增长
+  let usedReactivties = new Map()
+
+  let object = {
+    b: 0,
+    g: 0,
+    r: 0,
+    c: { zIndex: 20 }
+  }
+
+  let po = reactive(object)
+
+  effect(() => {
+    document.getElementById('r').value = po.r
+  })
+
+  effect(() => {
+    document.getElementById('g').value = po.g
+  })
+
+  effect(() => {
+    document.getElementById('b').value = po.b
+  })
+
+
+
+  effect(() => {
+    document.getElementById('color').style.backgroundColor = `rgb(${po.r},${po.b},${po.g})`
+  })
+
+  effect(() => {
+    document.getElementById('color').style.zIndex = po.c.zIndex
+
+  })
+
+  document.getElementById('r').addEventListener("input", event => po.r = event.target.value)
+  document.getElementById('g').addEventListener("input", event => po.g = event.target.value)
+  document.getElementById('b').addEventListener("input", event => po.b = event.target.value)
+
+
+  // 类似将数据绑定到模板
+  function effect(callback) {
+    // 清空已绑定的属性
+    usedReactivties = new Map()
+    callback();
+    console.log(usedReactivties)
+
+    // 将 callback 存入 callbacks 以供 set 的时候调用
+    for (let reactivityKey of usedReactivties.keys()) {
+      if (!callbacks.has(reactivityKey)) {
+        callbacks.set(reactivityKey, new Map())
+      }
+
+      for (let prop of usedReactivties.get(reactivityKey)) {
+        if (!callbacks.get(reactivityKey).has(prop)) {
+          callbacks.get(reactivityKey).set(prop, [])
+        }
+        callbacks.get(reactivityKey).get(prop).push(callback)
+      }
+    }
+  }
+
+  function reactive(obj) {
+    if (reactivties.has(obj))
+      return reactivties.get(obj);
+    let proxy = new Proxy(obj, {
+      set(obj, prop, val) {
+        obj[prop] = val
+        if (callbacks.get(obj))
+          if (callbacks.get(obj).get(prop))
+            for (let callback of callbacks.get(obj).get(prop)) {
+              callback()
+            }
+        return obj[prop]
+      },
+      get(obj, prop) {
+       
+        if (!usedReactivties.has(obj))
+          usedReactivties.set(obj, [])
+        if (!usedReactivties.get(obj).includes(prop))
+          usedReactivties.get(obj).push(prop)
+
+        // 递归调用实现监听属性为对象
+        if (typeof obj[prop] === "object")
+          return reactive(obj[prop])
+        return obj[prop]
+      }
+    })
+
+    // 缓存已创建 reactive proxy 的对象
+    reactivties.set(obj, proxy)
+    return proxy
+  }
+</script>
