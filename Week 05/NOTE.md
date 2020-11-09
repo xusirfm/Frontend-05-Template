@@ -1,3 +1,4 @@
+
 #学习笔记
 
 ## proxy
@@ -50,6 +51,6 @@ Vue 3 使用 proxy 实现数据的响应式，替代了过去使用的 Object.de
 
    * effect 函数传入一个 callback，首先执行一次 callback 获知使用到了哪些属性，将对应的属性与 callback 绑定，以供 set 属性的时候执行相应的callback。  
 
-   * reactive 函数传入一个对象，使用 proxy 对对象的 get 和 set 进行拦截。get 拦截将使用到的属性记录下来；set 拦截判断属性是否有 callback 调用，有则执行对应 callback 。  
+   * reactive 函数传入一个对象，使用 proxy 对对象的 get 和 set 进行拦截。get 拦截将使用到的属性记录下来；set 拦截判断属性是否有 callback 调用，有则执行对应 callback 。 
 
  
