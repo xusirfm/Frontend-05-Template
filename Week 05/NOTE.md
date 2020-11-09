@@ -13,7 +13,7 @@ Vue 3 使用 proxy 实现数据的响应式，替代了过去使用的 Object.de
 ## 支持拦截操作
 
   * get(target, propKey, receiver)  
-        拦截对象属性的读取，比如proxy.foo和proxy['foo']。
+        拦截对象属性的读取，比如proxy.foo和proxy['foo']
   * set(target, propKey, value, receiver)  
       拦截对象属性的设置，比如proxy.foo = v或proxy['foo'] = v，返回一个布尔值。
   * has(target, propKey)  
